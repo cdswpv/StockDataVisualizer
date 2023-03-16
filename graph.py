@@ -1,44 +1,16 @@
-
-# This document will contain functions to generate a graph from data and then display it in the browser
-import requests, pygal, lxml, re
+import requests, pygal, lxml, re, app
 from datetime import datetime
+from pygal.style import Style
 
-# Example API request for testing
+#####  Example API request for testing, will NOT be in final  #####
 
 query1 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=15min&apikey=demo"
 query2 = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=IBM&apikey=demo"
 query3 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=15min&apikey=ELUE44GZIWWXQ78B"
 
 json = requests.get(query3).json()
-# data = [{"date": k, **v} for k, v in json["Time Series (5min)"].items()]
 
-# symbol = json["Meta Data"]["2. Symbol"]
-
-# regex = re.compile("Time Series .*")
-
-# time_series = json[[key for key in json.keys() if re.match(r"Time Series .*", key)][0]]
-# data = [{"date": k, **v} for k, v in (
-#     json[
-#         [key for key in json.keys() if re.match(r"Time Series .*", key)][0]
-# ])]
-
-
-# if "Time Series (5min)" in data:
-#     key = "Time Series (5min)"
-# elif "Time Series (Daily)" in data:
-#     key = "Time Series (Daily)"
-# elif "Time Series (Weekly)" in data:
-#     key = "Time Series (Weekly)"
-
-
-
-options_template = {
-    "Open": [],
-    "High": [],
-    "Low": [],
-    "Close": []
-}
-
+#####  Functions accessable from outside  #####
 def create_line_graph(json: dict):
     '''
     Creates a Line Graph of given data and displays in the user's default browser.
@@ -55,9 +27,9 @@ def create_bar_graph(json: dict):
     Parameters:
         json: A dictionary representation of the data JSON.
     '''
-    create_graph(json, pygal.Bar(x_label_rotation=90))
+    create_graph(json, pygal.Bar())
 
-#   Data as a JSON Obj/Dictionary
+#####  Functions not to be accessed  #####
 def create_graph(json: dict, graph):
     '''
     Creates a graph from the given data and displays it in the user's default browser.
@@ -67,10 +39,10 @@ def create_graph(json: dict, graph):
         graph: A pygal graph object (pygal.Bar() & pygal.Line() are known to work)
     '''
     dates = []
-    options = options_template.copy()
+    options = { "Open": [], "High": [], "Low": [], "Close": [] }
+
     #   Extracts the data points from the JSON, now reformatted and sorted
     data = extract_data(json)
-    # title = create_title(symbol, data);
 
     #   Format data from JSON to be used by graph
     for item in data:
@@ -85,13 +57,21 @@ def create_graph(json: dict, graph):
         graph.add(opt, options[opt])
 
     #   Graph Setup and Render
-    # graph.x_label_rotaion = 90
+    graph.style = Style(
+        label_font_size = 30,
+        stroke_width = 15,
+        legend_font_size = 50,
+        title_font_size = 70
+    )
+    graph.dots_size = 15
     graph.x_labels = dates
-    # graph.width = 5000
-    # graph.height=2000
+    graph.x_label_rotation = 90
+    graph.width =(len(dates) * 50)
+    graph.height = len(dates) * 25
+    graph.title = create_title()
+
     graph.render_in_browser()
 
-#   Converts date string to datetime object
 def string_to_datetime(date: str):
     '''
     Converts a string date in format YYYY-MM-DD HH:MM:SS to a datetime object
@@ -108,16 +88,22 @@ def string_to_datetime(date: str):
         date_format = '%Y-%m-%d'
     return datetime.strptime(date, date_format)
 
-#   Used to sort the data array by each dict's  "date" key
 def get_date(item: dict):
     '''
-    Gets the value of "date" from a dictionary
+    Gets the value of "date" from a dictionary (used for sorting)
     '''
     return item["date"]
 
 def extract_data(json: dict):
-    # return [{"date": k, **v} for k, v in json[[key for key in json.keys() if re.match(r"Time Series .*", key)][0]].items()].sort(key = get_date) # this is an incredibly unreadable piece of code.
+    '''
+    Reformats the JSON response into an array containing each data point as a self contained dictionary.
 
+    Parameters:
+        json: A dictionary representing the response from the API
+
+    Returns:
+        Array of the newly minted data points. list[dict[str, Any]]
+    '''
     #   Finds the "Time Series" key within the dictionary, whether it is "Time Series (Daily)", "... (Monthly)", or "... (15min)"
     #   Loops through keys, checks if they match, then will return the first (and only) instance
     time_series = [k for k in json.keys() if re.match(r"Time Series .*", k)][0]
@@ -129,15 +115,22 @@ def extract_data(json: dict):
     data_points.sort(key = get_date)
     return data_points
 
-    # data = [{"date": k, **v} for k, v in json["Time Series (5min)"].items()]
 
-# def create_title(symbol: str, data: list[dict[str, any]]):
-#     day_optional = ""
-#     start = data[0]["date"]
-#     end = data[len(data)]["date"]
 
-#     return f"Stock Data for {symbol}: {day_optional} {start} to {end}"
 
-#   Test calls
-create_bar_graph(json)
-# create_line_graph(json)
+def create_title():
+    '''
+    Creates the title for the graph using data from app.py.
+    
+    Returns:
+        Title as string.
+    '''
+    symbol = app.GetStockSymbol()
+    begin = app.GetBeginningDate()
+    end = app.GetEndDate()
+    return f"Data for {symbol} From {begin} to {end}"
+
+
+#####  Test calls  #####
+# create_bar_graph(json)
+create_line_graph(json)
