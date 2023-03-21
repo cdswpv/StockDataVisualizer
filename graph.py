@@ -4,13 +4,14 @@ from pygal.style import Style
 
 #####  Example API request for testing, will NOT be in final  #####
 
-query1 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=15min&apikey=demo"
+query1 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo"
 query2 = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=IBM&apikey=demo"
 query3 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=15min&apikey=ELUE44GZIWWXQ78B"
+query4 = "https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=IBM&apikey=demo"
 
 json = requests.get(query3).json()
 
-#####  Functions accessable from outside  #####
+#####  Public Functions  #####
 def create_line_graph(json: dict):
     '''
     Creates a Line Graph of given data and displays in the user's default browser.
@@ -29,7 +30,7 @@ def create_bar_graph(json: dict):
     '''
     create_graph(json, pygal.Bar())
 
-#####  Functions not to be accessed  #####
+#####  Private Functions  #####
 def create_graph(json: dict, graph):
     '''
     Creates a graph from the given data and displays it in the user's default browser.
@@ -43,10 +44,11 @@ def create_graph(json: dict, graph):
 
     #   Extracts the data points from the JSON, now reformatted and sorted
     data = extract_data(json)
-
+    datetime = string_to_datetime()
     #   Format data from JSON to be used by graph
     for item in data:
-        dates.append(string_to_datetime(item["date"]))
+        # dates.append(string_to_datetime(item["date"]))
+        dates.append(datetime(item["date"]))
         options["Open"].append(float(item["1. open"]))
         options["High"].append(float(item["2. high"]))
         options["Low"].append(float(item["3. low"]))
@@ -58,35 +60,57 @@ def create_graph(json: dict, graph):
 
     #   Graph Setup and Render
     graph.style = Style(
-        label_font_size = 30,
+        # label_font_size = 50,
+        label_font_size = len(dates)/3,
         stroke_width = 15,
-        legend_font_size = 50,
-        title_font_size = 70
+        # legend_font_size = 50,
+        legend_font_size = len(dates)/2,
+        # title_font_size = 70
+        title_font_size = len(dates),
+        tooltip_font_size = 100
     )
     graph.dots_size = 15
     graph.x_labels = dates
     graph.x_label_rotation = 90
-    graph.width =(len(dates) * 50)
+    graph.width = len(dates) * 50
     graph.height = len(dates) * 25
     graph.title = create_title()
-
     graph.render_in_browser()
 
-def string_to_datetime(date: str):
+def string_to_datetime():
     '''
-    Converts a string date in format YYYY-MM-DD HH:MM:SS to a datetime object
+    Returns the convert() function:
 
-    Parameters:
-        date: String date in format YYYY-MM-DD w/ optional time formatting HH:MM:SS
+        Standard Function:
+            Converts a string date in format YYYY-MM-DD
 
-    Returns:
-        datetime object
+        Function for Intraday Graphs:
+            Converts string date to foramt HH:MM:SS
+            Keeps track what calendar date the data points belong to. When a data point exists on a new day the label is changed to YYYY-MM-DD HH:MM:SS to avoid confusion.
+
+        Parameters:
+            date: String date in format YYYY-MM-DD w/ optional time formatting HH:MM:SS
+
+        Returns:
+            string 
     '''
-    if re.match(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", date) is not None:  #   Format YYYY-MM-DD HH:MM:SS
-        date_format = '%Y-%m-%d %H:%M:%S'
-    elif re.match(r"\d{4}-\d{2}-\d{2}", date) is not None:                  #   Format YYYY-MM-DD
-        date_format = '%Y-%m-%d'
-    return datetime.strptime(date, date_format)
+    previous = datetime(1, 1, 1)
+    time_series = app.GetTimeSeries()
+    def convert(date: str):
+        nonlocal previous
+        if (time_series == "Intraday"):
+            day = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+            if (day.date() == previous.date()):
+                format = '%H:%M:%S'
+            else:
+                format = '%Y-%m-%d %H:%M:%S'
+                previous = day
+            return day.strftime(format)
+        else:
+            return datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
+    return convert
+
+    # return datetime.strptime(date, date_format).strftime(date_format)
 
 def get_date(item: dict):
     '''
@@ -106,7 +130,7 @@ def extract_data(json: dict):
     '''
     #   Finds the "Time Series" key within the dictionary, whether it is "Time Series (Daily)", "... (Monthly)", or "... (15min)"
     #   Loops through keys, checks if they match, then will return the first (and only) instance
-    time_series = [k for k in json.keys() if re.match(r"Time Series .*", k)][0]
+    time_series = [k for k in json.keys() if re.match(r".*Time Series.*", k)][0]
     #   Takes each line that looks like this: "YYYY-MM-DD": {"key1": "value1", "key2": "value2"}
     #   Converts it to this {"date": "YYYY-MM-DD", "key1": "value1", "key2": "value2"}
     #   And places them all into a list
@@ -128,7 +152,7 @@ def create_title():
     symbol = app.GetStockSymbol()
     begin = app.GetBeginningDate()
     end = app.GetEndDate()
-    return f"Data for {symbol} From {begin} to {end}"
+    return f"Stock Data for {symbol}: {begin} to {end}"
 
 
 #####  Test calls  #####
