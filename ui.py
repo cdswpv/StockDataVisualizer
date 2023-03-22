@@ -51,8 +51,8 @@ def get_dates():
             if bDate > eDate:
                 print("Error: Start date must be before end date.")
             else:
-                app.SetBeginningDate(bDate())
-                app.SetEndDate(eDate())
+                app.SetBeginningDate(bDate)
+                app.SetEndDate(eDate)
         except ValueError:
             print("Error: Invalid date format. Please enter a date in the format YYYY-MM-DD.")
             #if the user enteres a end date before the start date it will ask for the start date again.
