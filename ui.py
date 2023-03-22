@@ -70,5 +70,3 @@ def main():
 
         if not restart_program():
             break
-
-main()
