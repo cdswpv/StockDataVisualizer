@@ -1,16 +1,7 @@
-import requests, pygal, lxml, re, app
+import pygal, re, app
 from datetime import datetime
 from pygal.style import Style
 
-#####  Example API request for testing, will NOT be in final  #####
-
-query1 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo"
-query2 = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=IBM&apikey=demo"
-query3 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=15min&apikey=ELUE44GZIWWXQ78B"
-query4 = "https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=IBM&apikey=demo"
-query5 = "https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=TSCO.LON&apikey=demo"
-
-json = requests.get(query2).json()
 
 #####  Public Functions  #####
 def create_line_graph(json: dict):
@@ -184,6 +175,3 @@ def graph_styling(graph: pygal.Graph, point_count: int):
     graph.height = point_count * 25 
     graph.legend_box_size = point_count/3
 
-#####  Test calls  #####
-# create_bar_graph(json)
-create_line_graph(json)
