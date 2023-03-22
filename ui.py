@@ -1,5 +1,6 @@
 from datetime import datetime
 import app
+import graph
 def get_stock_symbol():
     stockSymbol = input("Enter the stock Symbol you are looking for: ")
     print(stockSymbol)
@@ -11,9 +12,11 @@ def get_chart_type():
         chartType = input("Chart Types\n----------\n1. Bar\n2. Line\nEnter the chart type you want (1, 2): ")
         if chartType == '1':
             print("Bar")
+            graph.create_bar_graph()
             valid_chart_type = True
         elif chartType == '2':
             print("Line")
+            graph.create_line_graph()
             valid_chart_type = True
         else:
             print("Invalid input. Please enter 1 or 2.")
@@ -63,10 +66,10 @@ def restart_program():
 def main():
     while True:
         print("Stock Data Visualizer\n--------------------")
-        stockSymbol = get_stock_symbol()
-        chartType = get_chart_type()
-        timeSeries = get_time_series()
-        bDate, eDate = get_dates()
+        get_stock_symbol()
+        get_chart_type()
+        get_time_series()
+        get_dates()
 
         if not restart_program():
             break
