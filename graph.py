@@ -80,6 +80,7 @@ def string_to_datetime():
     #   Set the previous var to be an impossible value so it can be used without messing with the graph.
     previous = datetime(1, 1, 1)
     time_series = app.GetTimeSeries()
+
     def convert(date: str):
         #   Stores the previous day as a static variable
         nonlocal previous
@@ -120,7 +121,6 @@ def extract_data(json: dict):
     Returns:
         Array of the newly minted data points. list[dict[str, Any]]
     '''
-    
     #   Finds the "Time Series" key within the dictionary, whether it is "Time Series (Daily)", "... (Monthly)", or "... (15min)"
     #   Loops through keys, checks if they match, then will return the first (and only) instance
     time_series = [k for k in json.keys() if re.match(r".*Time Series.*", k)][0]
