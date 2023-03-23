@@ -3,8 +3,9 @@ import graph
 import api
 import error
 
-api = None
+api = "ARJ4YHDD7BSSD94B"
 stockSymbol = None
+stock = None
 chartType = None
 timeSeries = None
 bDate = None
@@ -13,7 +14,15 @@ eDate = None
 #Main function needs to accept input and send output to the ui.py file.
 def Main():
     #Call function in ui.py that begins the interaction between the user and system
-    #ui.[functionname]()
+    print("Stock Data Visualizer\n--------------------")
+    #SetStockSymbol(ui.get_stock_symbol())
+    SetChartType(ui.get_chart_type())
+    SetTimeSeries(ui.get_time_series())
+    SetDates(ui.get_dates())
+
+    if not ui.restart_program():
+            #break
+            return
     return
 
 ########################
@@ -21,15 +30,14 @@ def Main():
 #These are things/functions for me to grab information
 ########################
 
-def SetApi(x):
-    #Gets Api key from api.py 
-    global api
-    api = x
-
 def SetStockSymbol(x):
     #Gets input from UI and sets the stock symbol
     global stockSymbol
     stockSymbol = x
+
+def SetStock(new_stock_data):
+    global stock
+    stock = new_stock_data
 
 def SetChartType(x):
     #Gets input from UI to determine the chart that they would like to use
@@ -42,18 +50,13 @@ def SetTimeSeries(x):
     global timeSeries
     timeSeries = x
 
-def SetBeginningDate(x):
+def SetDates(x, y):
     #Gets input from UI to set the beginning date for the charts
     #Must be a correct formart (error check)
     global bDate
     bDate = x
-
-def SetEndDate(x):
-    #Gets input from UI to set the end date for the charts
-    #Must be a correct formart (error check)
-    #Cannot be before the beginning date (error check)
     global eDate
-    eDate = x 
+    eDate = y     
 
 ########################
 #This is the Get Section
@@ -69,6 +72,9 @@ def GetApi():
 def GetStockSymbol():
     #Returns the stock symbol
     return stockSymbol
+
+def GetStock():
+    return stock
     
 def GetChartType():
     #Returns the chart type

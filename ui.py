@@ -1,5 +1,4 @@
 from datetime import datetime
-import app
 import graph
 def get_stock_symbol():
     stockSymbol = input("Enter the stock Symbol you are looking for: ")
