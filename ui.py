@@ -4,7 +4,7 @@ import graph
 def get_stock_symbol():
     stockSymbol = input("Enter the stock Symbol you are looking for: ")
     print(stockSymbol)
-    app.SetStockSymbol(get_stock_symbol())
+    return stockSymbol
 
 def get_chart_type():
     valid_chart_type = False
@@ -20,56 +20,49 @@ def get_chart_type():
             valid_chart_type = True
         else:
             print("Invalid input. Please enter 1 or 2.")
-    app.SetChartType(get_chart_type())
+    return chartType
 
 def get_time_series():
     valid_time_type = False
     while not valid_time_type:
         timeSeries = input("Select the time series of the chart you want to generate\n--------------------------\n1. Intradaily\n2. Daily\n3. Weekly\n4. Monthly\nEnter the time series option (1, 2, 3, 4): ")
         if timeSeries == '1':
-            print("Intradaily")
+            print("Intraday")
+            return "TIME_SERIES_INTRADAY"
             valid_time_type = True
         elif timeSeries == '2':
             print("Daily")
+            return "TIME_SERIES_DAILY"
             valid_time_type = True
         elif timeSeries == '3':
-            print("Daily")
+            print("Weekly")
+            return "TIME_SERIES_WEEKLY"
             valid_time_type = True
         elif timeSeries == '4':
-            print("Weekly")
+            print("Monthly")
+            return "TIME_SERIES_MONTHLY"
             valid_time_type = True
         else:
             print("Invalid input. Please enter 1, 2, 3 or 4.")
-        app.SetTimeSeries(get_time_series())
 
 def get_dates():
     while True:
         try:
             bDate = input("Enter the start date in format (YYYY-MM-DD): ")
             bDate = datetime.strptime(bDate, "%Y-%m-%d")
+            bDate_str = bDate.strftime("%Y-%m-%d")
             print(bDate.strftime("%Y-%m-%d"))
             eDate = input("Enter the ending date in format (YYYY-MM-DD): ")
             eDate = datetime.strptime(eDate, "%Y-%m-%d")
+            eDate_str = eDate.strftime("%Y-%m-%d")
             print(eDate.strftime("%Y-%m-%d"))
             if bDate > eDate:
                 print("Error: Start date must be before end date.")
             else:
-                app.SetBeginningDate(bDate)
-                app.SetEndDate(eDate)
+                return(bDate_str, eDate_str)
         except ValueError:
             print("Error: Invalid date format. Please enter a date in the format YYYY-MM-DD.")
             #if the user enteres a end date before the start date it will ask for the start date again.
 def restart_program():
     restart = input("Do you want to restart the program? (y/n): ")
     return restart.lower() == 'y'
-
-def main():
-    while True:
-        print("Stock Data Visualizer\n--------------------")
-        get_stock_symbol()
-        get_chart_type()
-        get_time_series()
-        get_dates()
-
-        if not restart_program():
-            break
